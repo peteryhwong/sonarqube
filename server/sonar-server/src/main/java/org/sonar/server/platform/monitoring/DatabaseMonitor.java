@@ -38,6 +38,28 @@ import java.util.Map;
  */
 public class DatabaseMonitor extends BaseMonitorMBean implements DatabaseMonitorMBean {
 
+  public interface DatabaseAttributes {
+    public static final String PRODUCT = "Database";
+    public static final String VERSION = "Database Version";
+    public static final String USERNAME = "Username";
+    public static final String URL = "URL";
+    public static final String DRIVER = "Driver";
+    public static final String DRIVER_VERSION = "Driver Version";
+    public static final String MIGRATION_STATUS = "Version Status";
+  }
+
+  public interface PoolAttributes {
+    public static final String ACTIVE_CONNECTIONS = "Pool Active Connections";
+    public static final String MAX_CONNECTIONS = "Pool Max Connections";
+    public static final String INITIAL_SIZE = "Pool Initial Size";
+    public static final String IDLE_CONNECTIONS = "Pool Idle Connections";
+    public static final String MIN_IDLE_CONNECTIONS = "Pool Min Idle Connections";
+    public static final String MAX_IDLE_CONNECTIONS = "Pool Max Idle Connections";
+    public static final String MAX_WAIT_MS = "Pool Max Wait (ms)";
+    public static final String REMOVE_ABANDONED = "Pool Remove Abandoned";
+    public static final String REMOVE_ABANDONED_TIMEOUT_SECONDS = "Pool Remove Abandoned Timeout (seconds)";
+  }
+
   private final DatabaseVersion dbVersion;
   private final DbClient dbClient;
 
@@ -110,15 +132,15 @@ public class DatabaseMonitor extends BaseMonitorMBean implements DatabaseMonitor
   }
 
   private void completePoolAttributes(Map<String, Object> attributes) {
-    attributes.put("Pool Active Connections", getPoolActiveConnections());
-    attributes.put("Pool Max Connections", getPoolMaxActiveConnections());
-    attributes.put("Pool Initial Size", getPoolInitialSize());
-    attributes.put("Pool Idle Connections", getPoolIdleConnections());
-    attributes.put("Pool Min Idle Connections", getPoolMinIdleConnections());
-    attributes.put("Pool Max Idle Connections", getPoolMaxIdleConnections());
-    attributes.put("Pool Max Wait (ms)", getPoolMaxWaitMillis());
-    attributes.put("Pool Remove Abandoned", getPoolRemoveAbandoned());
-    attributes.put("Pool Remove Abandoned Timeout (seconds)", getPoolRemoveAbandonedTimeoutSeconds());
+    attributes.put(PoolAttributes.ACTIVE_CONNECTIONS, getPoolActiveConnections());
+    attributes.put(PoolAttributes.MAX_CONNECTIONS, getPoolMaxActiveConnections());
+    attributes.put(PoolAttributes.INITIAL_SIZE, getPoolInitialSize());
+    attributes.put(PoolAttributes.IDLE_CONNECTIONS, getPoolIdleConnections());
+    attributes.put(PoolAttributes.MIN_IDLE_CONNECTIONS, getPoolMinIdleConnections());
+    attributes.put(PoolAttributes.MAX_IDLE_CONNECTIONS, getPoolMaxIdleConnections());
+    attributes.put(PoolAttributes.MAX_WAIT_MS, getPoolMaxWaitMillis());
+    attributes.put(PoolAttributes.REMOVE_ABANDONED, getPoolRemoveAbandoned());
+    attributes.put(PoolAttributes.REMOVE_ABANDONED_TIMEOUT_SECONDS, getPoolRemoveAbandonedTimeoutSeconds());
   }
 
   private BasicDataSource commonsDbcp() {
@@ -130,13 +152,13 @@ public class DatabaseMonitor extends BaseMonitorMBean implements DatabaseMonitor
     Connection connection = dbSession.getConnection();
     try {
       DatabaseMetaData metadata = connection.getMetaData();
-      attributes.put("Database", metadata.getDatabaseProductName());
-      attributes.put("Database Version", metadata.getDatabaseProductVersion());
-      attributes.put("Username", metadata.getUserName());
-      attributes.put("URL", metadata.getURL());
-      attributes.put("Driver", metadata.getDriverName());
-      attributes.put("Driver Version", metadata.getDriverVersion());
-      attributes.put("Version Status", getMigrationStatus());
+      attributes.put(DatabaseAttributes.PRODUCT, metadata.getDatabaseProductName());
+      attributes.put(DatabaseAttributes.VERSION, metadata.getDatabaseProductVersion());
+      attributes.put(DatabaseAttributes.USERNAME, metadata.getUserName());
+      attributes.put(DatabaseAttributes.URL, metadata.getURL());
+      attributes.put(DatabaseAttributes.DRIVER, metadata.getDriverName());
+      attributes.put(DatabaseAttributes.DRIVER_VERSION, metadata.getDriverVersion());
+      attributes.put(DatabaseAttributes.MIGRATION_STATUS, getMigrationStatus());
     } catch (SQLException e) {
       throw new IllegalStateException("Fail to get DB metadata", e);
 
