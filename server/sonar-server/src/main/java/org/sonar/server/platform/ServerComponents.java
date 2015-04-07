@@ -204,6 +204,7 @@ import org.sonar.server.platform.monitoring.PluginsMonitor;
 import org.sonar.server.platform.monitoring.SonarQubeMonitor;
 import org.sonar.server.platform.monitoring.SystemMonitor;
 import org.sonar.server.platform.ws.L10nWs;
+import org.sonar.server.platform.ws.ServerMigrateWsAction;
 import org.sonar.server.platform.ws.ServerWs;
 import org.sonar.server.platform.ws.SystemInfoWsAction;
 import org.sonar.server.platform.ws.SystemRestartWsAction;
@@ -379,7 +380,6 @@ import org.sonar.server.ws.ListingWs;
 import org.sonar.server.ws.WebServiceEngine;
 
 import javax.annotation.Nullable;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -549,6 +549,7 @@ class ServerComponents {
     pico.addSingleton(DefaultResourcePermissions.class);
     pico.addSingleton(Periods.class);
     pico.addSingleton(ServerWs.class);
+    pico.addSingleton(ServerMigrateWsAction.class);
     pico.addSingleton(BackendCleanup.class);
     pico.addSingleton(IndexDefinitions.class);
     pico.addSingleton(IndexCreator.class);
