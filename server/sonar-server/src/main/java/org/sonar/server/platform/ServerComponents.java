@@ -442,8 +442,6 @@ class ServerComponents {
 
       // dashboards
       DashboardDao.class,
-      DashboardsWebService.class,
-      DashboardsShowAction.class,
       WidgetDao.class,
       WidgetPropertyDao.class,
 
@@ -568,6 +566,10 @@ class ServerComponents {
     pico.addSingleton(SubmitReportWsAction.class);
     pico.addSingleton(IssuesAction.class);
     pico.addSingleton(BatchWs.class);
+
+    // Dashboard
+    pico.addSingleton(DashboardsWebService.class);
+    pico.addSingleton(DashboardsShowAction.class);
 
     // update center
     pico.addSingleton(UpdateCenterClient.class);
