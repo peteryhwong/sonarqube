@@ -35,6 +35,7 @@ import org.sonar.batch.protocol.output.BatchReportReader;
 import org.sonar.core.persistence.DbSession;
 import org.sonar.core.persistence.MyBatis;
 import org.sonar.core.source.db.FileSourceDto;
+import org.sonar.core.source.db.FileSourceDto.Type;
 import org.sonar.server.computation.ComputationContext;
 import org.sonar.server.computation.source.ComputeFileSourceData;
 import org.sonar.server.computation.source.CoverageLineReader;
@@ -124,7 +125,7 @@ public class PersistFileSourcesStep implements ComputationStep {
   private void persistSource(FileSourcesContext fileSourcesContext, ComputeFileSourceData.Data fileSourceData, BatchReport.Component component) {
     FileSourceDb.Data fileData = fileSourceData.getFileSourceData();
 
-    byte[] data = FileSourceDto.encodeData(fileData);
+    byte[] data = FileSourceDto.encodeSourceData(fileData);
     String dataHash = DigestUtils.md5Hex(data);
     String srcHash = fileSourceData.getSrcHash();
     String lineHashes = fileSourceData.getLineHashes();
@@ -134,6 +135,7 @@ public class PersistFileSourcesStep implements ComputationStep {
       FileSourceDto dto = new FileSourceDto()
         .setProjectUuid(fileSourcesContext.context.getProject().uuid())
         .setFileUuid(component.getUuid())
+        .setDataType(Type.SOURCE)
         .setBinaryData(data)
         .setSrcHash(srcHash)
         .setDataHash(dataHash)
@@ -152,7 +154,7 @@ public class PersistFileSourcesStep implements ComputationStep {
           .setDataHash(dataHash)
           .setSrcHash(srcHash)
           .setLineHashes(lineHashes);
-        // Optimization only change updated at when updating binary data to avoid unecessary indexation by E/S
+        // Optimization only change updated at when updating binary data to avoid unnecessary indexation by E/S
         if (binaryDataUpdated) {
           previousDto.setUpdatedAt(system2.now());
         }

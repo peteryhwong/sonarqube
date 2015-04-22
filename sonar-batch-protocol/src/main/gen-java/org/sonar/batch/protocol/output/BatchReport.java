@@ -21118,13 +21118,13 @@ public final class BatchReport {
     org.sonar.batch.protocol.Constants.TestStatus getStatus();
 
     /**
-     * <code>optional int64 duration_in_ms = 4;</code>
+     * <code>optional int64 execution_time_ms = 4;</code>
      */
-    boolean hasDurationInMs();
+    boolean hasExecutionTimeMs();
     /**
-     * <code>optional int64 duration_in_ms = 4;</code>
+     * <code>optional int64 execution_time_ms = 4;</code>
      */
-    long getDurationInMs();
+    long getExecutionTimeMs();
 
     /**
      * <code>optional string stacktrace = 5;</code>
@@ -21236,7 +21236,7 @@ public final class BatchReport {
             }
             case 32: {
               bitField0_ |= 0x00000008;
-              durationInMs_ = input.readInt64();
+              executionTimeMs_ = input.readInt64();
               break;
             }
             case 42: {
@@ -21363,19 +21363,19 @@ public final class BatchReport {
       return status_;
     }
 
-    public static final int DURATION_IN_MS_FIELD_NUMBER = 4;
-    private long durationInMs_;
+    public static final int EXECUTION_TIME_MS_FIELD_NUMBER = 4;
+    private long executionTimeMs_;
     /**
-     * <code>optional int64 duration_in_ms = 4;</code>
+     * <code>optional int64 execution_time_ms = 4;</code>
      */
-    public boolean hasDurationInMs() {
+    public boolean hasExecutionTimeMs() {
       return ((bitField0_ & 0x00000008) == 0x00000008);
     }
     /**
-     * <code>optional int64 duration_in_ms = 4;</code>
+     * <code>optional int64 execution_time_ms = 4;</code>
      */
-    public long getDurationInMs() {
-      return durationInMs_;
+    public long getExecutionTimeMs() {
+      return executionTimeMs_;
     }
 
     public static final int STACKTRACE_FIELD_NUMBER = 5;
@@ -21466,7 +21466,7 @@ public final class BatchReport {
       name_ = "";
       type_ = org.sonar.batch.protocol.Constants.TestType.UT;
       status_ = org.sonar.batch.protocol.Constants.TestStatus.OK;
-      durationInMs_ = 0L;
+      executionTimeMs_ = 0L;
       stacktrace_ = "";
       msg_ = "";
     }
@@ -21493,7 +21493,7 @@ public final class BatchReport {
         output.writeEnum(3, status_.getNumber());
       }
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        output.writeInt64(4, durationInMs_);
+        output.writeInt64(4, executionTimeMs_);
       }
       if (((bitField0_ & 0x00000010) == 0x00000010)) {
         output.writeBytes(5, getStacktraceBytes());
@@ -21524,7 +21524,7 @@ public final class BatchReport {
       }
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(4, durationInMs_);
+          .computeInt64Size(4, executionTimeMs_);
       }
       if (((bitField0_ & 0x00000010) == 0x00000010)) {
         size += com.google.protobuf.CodedOutputStream
@@ -21657,7 +21657,7 @@ public final class BatchReport {
         bitField0_ = (bitField0_ & ~0x00000002);
         status_ = org.sonar.batch.protocol.Constants.TestStatus.OK;
         bitField0_ = (bitField0_ & ~0x00000004);
-        durationInMs_ = 0L;
+        executionTimeMs_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000008);
         stacktrace_ = "";
         bitField0_ = (bitField0_ & ~0x00000010);
@@ -21706,7 +21706,7 @@ public final class BatchReport {
         if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
           to_bitField0_ |= 0x00000008;
         }
-        result.durationInMs_ = durationInMs_;
+        result.executionTimeMs_ = executionTimeMs_;
         if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
           to_bitField0_ |= 0x00000010;
         }
@@ -21742,8 +21742,8 @@ public final class BatchReport {
         if (other.hasStatus()) {
           setStatus(other.getStatus());
         }
-        if (other.hasDurationInMs()) {
-          setDurationInMs(other.getDurationInMs());
+        if (other.hasExecutionTimeMs()) {
+          setExecutionTimeMs(other.getExecutionTimeMs());
         }
         if (other.hasStacktrace()) {
           bitField0_ |= 0x00000010;
@@ -21928,34 +21928,34 @@ public final class BatchReport {
         return this;
       }
 
-      private long durationInMs_ ;
+      private long executionTimeMs_ ;
       /**
-       * <code>optional int64 duration_in_ms = 4;</code>
+       * <code>optional int64 execution_time_ms = 4;</code>
        */
-      public boolean hasDurationInMs() {
+      public boolean hasExecutionTimeMs() {
         return ((bitField0_ & 0x00000008) == 0x00000008);
       }
       /**
-       * <code>optional int64 duration_in_ms = 4;</code>
+       * <code>optional int64 execution_time_ms = 4;</code>
        */
-      public long getDurationInMs() {
-        return durationInMs_;
+      public long getExecutionTimeMs() {
+        return executionTimeMs_;
       }
       /**
-       * <code>optional int64 duration_in_ms = 4;</code>
+       * <code>optional int64 execution_time_ms = 4;</code>
        */
-      public Builder setDurationInMs(long value) {
+      public Builder setExecutionTimeMs(long value) {
         bitField0_ |= 0x00000008;
-        durationInMs_ = value;
+        executionTimeMs_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional int64 duration_in_ms = 4;</code>
+       * <code>optional int64 execution_time_ms = 4;</code>
        */
-      public Builder clearDurationInMs() {
+      public Builder clearExecutionTimeMs() {
         bitField0_ = (bitField0_ & ~0x00000008);
-        durationInMs_ = 0L;
+        executionTimeMs_ = 0L;
         onChanged();
         return this;
       }
@@ -23702,15 +23702,15 @@ public final class BatchReport {
       "ditions\030\005 \001(\005\022\035\n\025it_covered_conditions\030\006" +
       " \001(\005\022\"\n\032overall_covered_conditions\030\007 \001(\005" +
       "\"L\n\022SyntaxHighlighting\022\025\n\005range\030\001 \001(\0132\006." +
-      "Range\022\037\n\004type\030\002 \001(\0162\021.HighlightingType\"\203" +
+      "Range\022\037\n\004type\030\002 \001(\0162\021.HighlightingType\"\206" +
       "\001\n\004Test\022\014\n\004name\030\001 \001(\t\022\027\n\004type\030\002 \001(\0162\t.Te" +
-      "stType\022\033\n\006status\030\003 \001(\0162\013.TestStatus\022\026\n\016d",
-      "uration_in_ms\030\004 \001(\003\022\022\n\nstacktrace\030\005 \001(\t\022" +
-      "\013\n\003msg\030\006 \001(\t\"\221\001\n\016CoverageDetail\022\021\n\ttest_" +
-      "name\030\001 \001(\t\0221\n\014covered_file\030\002 \003(\0132\033.Cover" +
-      "ageDetail.CoveredFile\0329\n\013CoveredFile\022\020\n\010" +
-      "file_ref\030\001 \001(\005\022\030\n\014covered_line\030\002 \003(\005B\002\020\001" +
-      "B#\n\037org.sonar.batch.protocol.outputH\001"
+      "stType\022\033\n\006status\030\003 \001(\0162\013.TestStatus\022\031\n\021e",
+      "xecution_time_ms\030\004 \001(\003\022\022\n\nstacktrace\030\005 \001" +
+      "(\t\022\013\n\003msg\030\006 \001(\t\"\221\001\n\016CoverageDetail\022\021\n\tte" +
+      "st_name\030\001 \001(\t\0221\n\014covered_file\030\002 \003(\0132\033.Co" +
+      "verageDetail.CoveredFile\0329\n\013CoveredFile\022" +
+      "\020\n\010file_ref\030\001 \001(\005\022\030\n\014covered_line\030\002 \003(\005B" +
+      "\002\020\001B#\n\037org.sonar.batch.protocol.outputH\001"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -23838,7 +23838,7 @@ public final class BatchReport {
     internal_static_Test_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_Test_descriptor,
-        new java.lang.String[] { "Name", "Type", "Status", "DurationInMs", "Stacktrace", "Msg", });
+        new java.lang.String[] { "Name", "Type", "Status", "ExecutionTimeMs", "Stacktrace", "Msg", });
     internal_static_CoverageDetail_descriptor =
       getDescriptor().getMessageTypes().get(17);
     internal_static_CoverageDetail_fieldAccessorTable = new

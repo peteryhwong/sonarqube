@@ -20,25 +20,31 @@
 
 package org.sonar.core.source.db;
 
-import org.apache.ibatis.annotations.Param;
+import org.junit.Test;
+import org.sonar.server.source.db.FileSourceDb;
 
-import javax.annotation.CheckForNull;
-
+import java.util.Arrays;
 import java.util.List;
 
-public interface FileSourceMapper {
+import static org.assertj.core.api.Assertions.assertThat;
 
-  List<FileSourceDto> selectHashesForProject(String projectUuid);
+public class FileSourceDtoTest {
 
-  @CheckForNull
-  FileSourceDto select(@Param("fileUuid") String fileUuid, @Param("dataType") String dataType);
+  @Test
+  public void encode_and_decode_test_data() throws Exception {
+    List<FileSourceDb.Test> tests = Arrays.asList(
+      FileSourceDb.Test.newBuilder()
+        .setFileUuid("uuid-1")
+        .build(),
+      FileSourceDb.Test.newBuilder()
+        .setFileUuid("uuid-2")
+        .build()
+    );
 
-  void insert(FileSourceDto dto);
+    FileSourceDto sut = new FileSourceDto()
+      .setTestData(tests);
 
-  void update(FileSourceDto dto);
-
-  void updateDateWhenUpdatedDateIsZero(@Param("projectUuid") String projectUuid, @Param("date") Long updateDate);
-
-  @CheckForNull
-  String selectLineHashes(String fileUuid);
+    assertThat(sut.getTestData()).hasSize(2);
+    assertThat(sut.getTestData().get(0).getFileUuid()).isEqualTo("uuid-1");
+  }
 }

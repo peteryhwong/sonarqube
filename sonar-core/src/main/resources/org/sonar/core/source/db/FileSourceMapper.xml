@@ -8,22 +8,22 @@
     SELECT id, project_uuid as projectUuid, file_uuid as fileUuid, created_at as createdAt, updated_at as updatedAt,
     binary_data as binaryData, line_hashes as lineHashes, data_hash as dataHash, src_hash as srcHash, data_type as dataType
     FROM file_sources
-    WHERE file_uuid = #{fileUuid}
+    WHERE file_uuid = #{fileUuid} and data_type = #{dataType}
   </select>
-  
+
   <select id="selectHashesForProject" parameterType="string" resultType="org.sonar.core.source.db.FileSourceDto">
     SELECT id, file_uuid as fileUuid, data_type as dataType, data_hash as dataHash, src_hash as srcHash, updated_at as updatedAt
     FROM file_sources
     WHERE project_uuid = #{projectUuid}
   </select>
-  
+
   <insert id="insert" parameterType="org.sonar.core.source.db.FileSourceDto" useGeneratedKeys="false">
     INSERT INTO file_sources (project_uuid, file_uuid, created_at, updated_at, binary_data, line_hashes, data_hash, src_hash, data_type)
     VALUES (#{projectUuid,jdbcType=VARCHAR}, #{fileUuid,jdbcType=VARCHAR}, #{createdAt,jdbcType=BIGINT},
     #{updatedAt,jdbcType=BIGINT}, #{binaryData,jdbcType=BLOB}, #{lineHashes,jdbcType=CLOB},
     #{dataHash,jdbcType=VARCHAR}, #{srcHash,jdbcType=VARCHAR},#{dataType,jdbcType=VARCHAR})
   </insert>
-  
+
   <update id="update" parameterType="org.sonar.core.source.db.FileSourceDto" useGeneratedKeys="false">
     UPDATE file_sources SET
       updated_at = #{updatedAt,jdbcType=BIGINT},
@@ -45,7 +45,7 @@
   <select id="selectLineHashes" parameterType="string" resultType="String">
     SELECT line_hashes
     FROM file_sources
-    WHERE file_uuid = #{fileUuid}
+    WHERE file_uuid = #{fileUuid} and data_type='SOURCE'
   </select>
 
 </mapper>
