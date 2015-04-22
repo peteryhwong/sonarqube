@@ -19,6 +19,7 @@
  */
 package org.sonar.api.test;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 
 public interface TestCase {
@@ -44,16 +45,23 @@ public interface TestCase {
   /**
    * Duration in milliseconds
    */
+  @CheckForNull
   Long durationInMs();
 
+  /**
+   * @deprecated since 5.2 not used
+   */
+  @Deprecated
   String type();
 
   Status status();
 
   String name();
 
+  @CheckForNull
   String message();
 
+  @CheckForNull
   String stackTrace();
 
   TestPlan testPlan();
