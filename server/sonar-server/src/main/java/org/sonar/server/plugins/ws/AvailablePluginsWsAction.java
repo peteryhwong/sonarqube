@@ -27,6 +27,7 @@ import org.sonar.api.server.ws.WebService;
 import org.sonar.api.utils.text.JsonWriter;
 import org.sonar.server.plugins.UpdateCenterMatrixFactory;
 import org.sonar.updatecenter.common.PluginUpdate;
+import org.sonar.updatecenter.common.UpdateCenter;
 
 import java.util.Collection;
 
@@ -50,6 +51,8 @@ public class AvailablePluginsWsAction implements PluginsWsAction {
     controller.createAction("available")
       .setDescription("Get the list of all the plugins available for installation on the SonarQube instance, sorted by plugin name." +
         "<br/>" +
+        "Plugin information is retrieved from Update Center. Date and time at which Update Center was last refreshed is provided in the response." +
+        "<br/>" +
         "Update status values are: [COMPATIBLE, INCOMPATIBLE, REQUIRES_UPGRADE, DEPS_REQUIRE_UPGRADE]")
       .setSince("5.2")
       .setHandler(this)
@@ -61,25 +64,29 @@ public class AvailablePluginsWsAction implements PluginsWsAction {
     JsonWriter jsonWriter = response.newJsonWriter();
     jsonWriter.beginObject();
 
-    writePlugins(jsonWriter);
+    UpdateCenter updateCenter = updateCenterFactory.getUpdateCenter(DO_NOT_FORCE_REFRESH);
 
+    writePlugins(jsonWriter, updateCenter);
+
+    pluginWSCommons.writeUpdateCenterProperties(jsonWriter, updateCenter);
+
+    jsonWriter.endObject();
     jsonWriter.close();
   }
 
-  private void writePlugins(JsonWriter jsonWriter) {
-    jsonWriter.name(ARRAY_PLUGINS);
-    jsonWriter.beginArray();
-    for (PluginUpdate pluginUpdate : retrieveAvailablePlugins()) {
+  private void writePlugins(JsonWriter jsonWriter, UpdateCenter updateCenter) {
+    jsonWriter.name(ARRAY_PLUGINS).beginArray();
+    for (PluginUpdate pluginUpdate : retrieveAvailablePlugins(updateCenter)) {
       pluginWSCommons.writePluginUpdate(jsonWriter, pluginUpdate);
     }
     jsonWriter.endArray();
-    jsonWriter.endObject();
   }
 
-  private Collection<PluginUpdate> retrieveAvailablePlugins() {
+  private Collection<PluginUpdate> retrieveAvailablePlugins(UpdateCenter updateCenter) {
     return ImmutableSortedSet.copyOf(
-        NAME_KEY_PLUGIN_UPDATE_ORDERING,
-        updateCenterFactory.getUpdateCenter(DO_NOT_FORCE_REFRESH).findAvailablePlugins()
-    );
+      NAME_KEY_PLUGIN_UPDATE_ORDERING,
+      updateCenter.findAvailablePlugins()
+      );
   }
+
 }

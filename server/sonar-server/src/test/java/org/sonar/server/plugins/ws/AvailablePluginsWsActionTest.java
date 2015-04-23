@@ -22,10 +22,7 @@ package org.sonar.server.plugins.ws;
 import org.junit.Test;
 import org.sonar.api.server.ws.WebService;
 import org.sonar.server.ws.WsTester;
-import org.sonar.updatecenter.common.Plugin;
 import org.sonar.updatecenter.common.PluginUpdate;
-import org.sonar.updatecenter.common.Release;
-import org.sonar.updatecenter.common.Version;
 
 import static com.google.common.collect.ImmutableList.of;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -103,26 +100,26 @@ public class AvailablePluginsWsActionTest extends AbstractUpdateCenterBasedPlugi
     underTest.handle(request, response);
 
     assertJson(response.outputAsString()).isSimilarTo(
-        "{" +
-            "  \"plugins\": [" +
-            "    {" +
-            "      \"update\": {" +
-            "        \"status\": \"" + expectedValue + "\"" +
-            "      }" +
-            "    }" +
-            "  ]" +
-            "}"
-    );
+      "{" +
+        "  \"plugins\": [" +
+        "    {" +
+        "      \"update\": {" +
+        "        \"status\": \"" + expectedValue + "\"" +
+        "      }" +
+        "    }" +
+        "  ]" +
+        "}"
+      );
   }
 
   @Test
   public void plugins_are_sorted_by_name_then_key_and_made_unique() throws Exception {
     when(updateCenter.findAvailablePlugins()).thenReturn(of(
-        pluginUpdate("key2", "name2"),
-        pluginUpdate("key1", "name2"),
-        pluginUpdate("key2", "name2"),
-        pluginUpdate("key0", "name0"),
-        pluginUpdate("key1", "name1")
-    ));
+      pluginUpdate("key2", "name2"),
+      pluginUpdate("key1", "name2"),
+      pluginUpdate("key2", "name2"),
+      pluginUpdate("key0", "name0"),
+      pluginUpdate("key1", "name1")
+      ));
   }
 }

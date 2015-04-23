@@ -27,6 +27,7 @@ import org.sonar.api.server.ws.WebService;
 import org.sonar.api.utils.text.JsonWriter;
 import org.sonar.server.plugins.UpdateCenterMatrixFactory;
 import org.sonar.updatecenter.common.PluginUpdate;
+import org.sonar.updatecenter.common.UpdateCenter;
 
 import java.util.Collection;
 
@@ -44,7 +45,7 @@ public class UpdatesPluginsWsAction implements PluginsWsAction {
   private final PluginWSCommons pluginWSCommons;
 
   public UpdatesPluginsWsAction(UpdateCenterMatrixFactory updateCenterMatrixFactory,
-                                PluginWSCommons pluginWSCommons) {
+    PluginWSCommons pluginWSCommons) {
     this.updateCenterMatrixFactory = updateCenterMatrixFactory;
     this.pluginWSCommons = pluginWSCommons;
   }
@@ -55,6 +56,8 @@ public class UpdatesPluginsWsAction implements PluginsWsAction {
       .setDescription("Lists plugins installed on the SonarQube instance for which at least one newer version is available, sorted by plugin name." +
         "br/>" +
         "Each newer version is a separate entry in the returned list, with its update/compatibility status." +
+        "<br/>" +
+        "Plugin information is retrieved from Update Center. Date and time at which Update Center was last refreshed is provided in the response." +
         "<br/>" +
         "Update status values are: [COMPATIBLE, INCOMPATIBLE, REQUIRES_UPGRADE, DEPS_REQUIRE_UPGRADE]")
       .setSince("5.2")
@@ -67,25 +70,29 @@ public class UpdatesPluginsWsAction implements PluginsWsAction {
     JsonWriter jsonWriter = response.newJsonWriter();
     jsonWriter.beginObject();
 
-    writePlugins(jsonWriter);
+    UpdateCenter updateCenter = updateCenterMatrixFactory.getUpdateCenter(DO_NOT_FORCE_REFRESH);
 
+    writePlugins(jsonWriter, updateCenter);
+
+    pluginWSCommons.writeUpdateCenterProperties(jsonWriter, updateCenter);
+
+    jsonWriter.endObject();
     jsonWriter.close();
   }
 
-  private void writePlugins(JsonWriter jsonWriter) {
+  private void writePlugins(JsonWriter jsonWriter, UpdateCenter updateCenter) {
     jsonWriter.name(ARRAY_PLUGINS);
     jsonWriter.beginArray();
-    for (PluginUpdate pluginUpdate : retrieveUpdatablePlugins()) {
+    for (PluginUpdate pluginUpdate : retrieveUpdatablePlugins(updateCenter)) {
       pluginWSCommons.writePluginUpdate(jsonWriter, pluginUpdate);
     }
     jsonWriter.endArray();
-    jsonWriter.endObject();
   }
 
-  private Collection<PluginUpdate> retrieveUpdatablePlugins() {
+  private Collection<PluginUpdate> retrieveUpdatablePlugins(UpdateCenter updateCenter) {
     return ImmutableSortedSet.copyOf(
       NAME_KEY_PLUGIN_UPDATE_ORDERING,
-      updateCenterMatrixFactory.getUpdateCenter(DO_NOT_FORCE_REFRESH).findPluginUpdates()
+      updateCenter.findPluginUpdates()
       );
   }
 }

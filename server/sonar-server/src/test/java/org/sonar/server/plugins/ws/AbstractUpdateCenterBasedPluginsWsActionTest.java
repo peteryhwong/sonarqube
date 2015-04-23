@@ -89,5 +89,6 @@ public class AbstractUpdateCenterBasedPluginsWsActionTest {
   @Before
   public void wireMocksTogether() throws Exception {
     when(updateCenterFactory.getUpdateCenter(anyBoolean())).thenReturn(updateCenter);
+    when(updateCenter.getDate()).thenReturn(DateUtils.parseDateTime("2015-04-24T16:08:36+0200"));
   }
 }
