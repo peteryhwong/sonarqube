@@ -38,6 +38,7 @@ import org.sonar.batch.protocol.output.FileStructure;
 import org.sonar.core.persistence.DbSession;
 import org.sonar.core.persistence.DbTester;
 import org.sonar.core.source.db.FileSourceDto;
+import org.sonar.core.source.db.FileSourceDto.Type;
 import org.sonar.server.component.ComponentTesting;
 import org.sonar.server.computation.ComputationContext;
 import org.sonar.server.db.DbClient;
@@ -359,6 +360,7 @@ public class PersistFileSourcesStepTest extends BaseStepTest {
     dbClient.fileSourceDao().insert(session, new FileSourceDto()
       .setProjectUuid(PROJECT_UUID)
       .setFileUuid(FILE_UUID)
+      .setDataType(Type.SOURCE)
       .setSrcHash("5b4bd9815cdb17b8ceae19eb1810c34c")
       .setLineHashes("6438c669e0d0de98e6929c2cc0fac474\n")
       .setDataHash("6cad150e3d065976c230cddc5a09efaa")
@@ -389,6 +391,7 @@ public class PersistFileSourcesStepTest extends BaseStepTest {
     dbClient.fileSourceDao().insert(session, new FileSourceDto()
       .setProjectUuid(PROJECT_UUID)
       .setFileUuid(FILE_UUID)
+      .setDataType(Type.SOURCE)
       // Source hash is missing, update will be made
       .setLineHashes("137f72c3708c6bd0de00a0e5a69c699b")
       .setDataHash("29f25900140c94db38035128cb6de6a2")

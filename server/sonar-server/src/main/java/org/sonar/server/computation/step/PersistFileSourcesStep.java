@@ -20,6 +20,7 @@
 
 package org.sonar.server.computation.step;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
@@ -77,13 +78,14 @@ public class PersistFileSourcesStep implements ComputationStep {
     DbSession session = dbClient.openSession(false);
     try {
       final Map<String, FileSourceDto> previousFileSourcesByUuid = new HashMap<>();
-      session.select("org.sonar.core.source.db.FileSourceMapper.selectHashesForProject", context.getProject().uuid(), new ResultHandler() {
-        @Override
-        public void handleResult(ResultContext context) {
-          FileSourceDto dto = (FileSourceDto) context.getResultObject();
-          previousFileSourcesByUuid.put(dto.getFileUuid(), dto);
-        }
-      });
+      session.select("org.sonar.core.source.db.FileSourceMapper.selectHashesForProject", ImmutableMap.of("projectUuid", context.getProject().uuid(), "dataType", Type.SOURCE),
+        new ResultHandler() {
+          @Override
+          public void handleResult(ResultContext context) {
+            FileSourceDto dto = (FileSourceDto) context.getResultObject();
+            previousFileSourcesByUuid.put(dto.getFileUuid(), dto);
+          }
+        });
 
       recursivelyProcessComponent(new FileSourcesContext(session, context, previousFileSourcesByUuid), rootComponentRef);
     } finally {

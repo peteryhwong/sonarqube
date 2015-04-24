@@ -24,7 +24,10 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ListMultimap;
+import org.apache.ibatis.session.ResultContext;
+import org.apache.ibatis.session.ResultHandler;
 import org.sonar.api.resources.Qualifiers;
 import org.sonar.api.utils.System2;
 import org.sonar.batch.protocol.output.BatchReport;
@@ -42,7 +45,9 @@ import javax.annotation.CheckForNull;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 public class PersistTestsStep implements ComputationStep {
@@ -62,10 +67,11 @@ public class PersistTestsStep implements ComputationStep {
 
   @Override
   public void execute(ComputationContext computationContext) {
-    DbSession session = dbClient.openSession(false);
+    DbSession session = dbClient.openSession(true);
     try {
       int rootComponentRef = computationContext.getReportMetadata().getRootComponentRef();
-      TestContext context = new TestContext(session, computationContext);
+      TestContext context = new TestContext(computationContext, session);
+
       recursivelyProcessComponent(context, rootComponentRef);
       session.commit();
     } finally {
@@ -86,36 +92,10 @@ public class PersistTestsStep implements ComputationStep {
   }
 
   private void persistTestResults(BatchReport.Component component, TestContext context) {
-    ReportIterator<BatchReport.Test> testIterator = new ReportIterator<>(context.reader.readTests(component.getRef()), BatchReport.Test.PARSER);
-    ListMultimap<String, FileSourceDb.Test.CoveredFile> nameToCoveredFiles = loadCoverageDetails(component.getRef(), context);
-    List<FileSourceDb.Test> tests = new ArrayList<>();
+    ListMultimap<String, FileSourceDb.Test.CoveredFile> coveredFilesByName = loadCoverageDetails(component.getRef(), context);
+    List<FileSourceDb.Test> tests = buildDbTests(component, context, coveredFilesByName);
 
-    while (testIterator.hasNext()) {
-      BatchReport.Test batchTest = testIterator.next();
-      FileSourceDb.Test.Builder dbTest = FileSourceDb.Test.newBuilder();
-      dbTest.setFileUuid(component.getUuid());
-      dbTest.setType(batchTest.getType());
-      dbTest.setName(batchTest.getName());
-      if (batchTest.hasStacktrace()) {
-        dbTest.setStacktrace(batchTest.getStacktrace());
-      }
-      if (batchTest.hasStatus()) {
-        dbTest.setStatus(batchTest.getStatus());
-      }
-      if (batchTest.hasMsg()) {
-        dbTest.setMsg(batchTest.getMsg());
-      }
-      if (batchTest.hasExecutionTimeMs()) {
-        dbTest.setExecutionTimeMs(batchTest.getExecutionTimeMs());
-      }
-      List<FileSourceDb.Test.CoveredFile> coveredFiles = nameToCoveredFiles == null ? null : nameToCoveredFiles.get(batchTest.getName());
-      if (coveredFiles != null) {
-        dbTest.addAllCoveredFile(coveredFiles);
-      }
-      tests.add(dbTest.build());
-    }
-
-    FileSourceDto existingDto = dbClient.fileSourceDao().selectTest(component.getUuid());
+    FileSourceDto existingDto = context.existingFileSourcesByUuid.get(component.getUuid());
     long now = system.now();
     if (existingDto != null) {
       // update
@@ -134,6 +114,36 @@ public class PersistTestsStep implements ComputationStep {
         .setUpdatedAt(now);
       dbClient.fileSourceDao().insert(context.session, newDto);
     }
+  }
+
+  private List<FileSourceDb.Test> buildDbTests(BatchReport.Component component, TestContext context, ListMultimap<String, FileSourceDb.Test.CoveredFile> coveredFilesByName) {
+    List<FileSourceDb.Test> tests = new ArrayList<>();
+    ReportIterator<BatchReport.Test> testIterator = new ReportIterator<>(context.reader.readTests(component.getRef()), BatchReport.Test.PARSER);
+    while (testIterator.hasNext()) {
+      BatchReport.Test batchTest = testIterator.next();
+      FileSourceDb.Test.Builder dbTest = FileSourceDb.Test.newBuilder();
+      dbTest.setType(batchTest.getType());
+      dbTest.setName(batchTest.getName());
+      if (batchTest.hasStacktrace()) {
+        dbTest.setStacktrace(batchTest.getStacktrace());
+      }
+      if (batchTest.hasStatus()) {
+        dbTest.setStatus(batchTest.getStatus());
+      }
+      if (batchTest.hasMsg()) {
+        dbTest.setMsg(batchTest.getMsg());
+      }
+      if (batchTest.hasExecutionTimeMs()) {
+        dbTest.setExecutionTimeMs(batchTest.getExecutionTimeMs());
+      }
+      List<FileSourceDb.Test.CoveredFile> coveredFiles = coveredFilesByName == null ? null : coveredFilesByName.get(batchTest.getName());
+      if (coveredFiles != null) {
+        dbTest.addAllCoveredFile(coveredFiles);
+      }
+      tests.add(dbTest.build());
+    }
+
+    return tests;
   }
 
   @CheckForNull
@@ -167,8 +177,9 @@ public class PersistTestsStep implements ComputationStep {
     final ComputationContext context;
     final BatchReportReader reader;
     final Cache<Integer, String> componentRefToUuidCache;
+    final Map<String, FileSourceDto> existingFileSourcesByUuid;
 
-    TestContext(DbSession session, ComputationContext context) {
+    TestContext(ComputationContext context, DbSession session) {
       this.session = session;
       this.context = context;
       this.reader = context.getReportReader();
@@ -180,6 +191,16 @@ public class PersistTestsStep implements ComputationStep {
               return reader.readComponent(key).getUuid();
             }
           });
+      existingFileSourcesByUuid = new HashMap<>();
+      session.select("org.sonar.core.source.db.FileSourceMapper.selectHashesForProject",
+        ImmutableMap.of("projectUuid", context.getProject().uuid(), "dataType", Type.TEST),
+        new ResultHandler() {
+          @Override
+          public void handleResult(ResultContext context) {
+            FileSourceDto dto = (FileSourceDto) context.getResultObject();
+            existingFileSourcesByUuid.put(dto.getFileUuid(), dto);
+          }
+        });
     }
 
     public String getUuid(int fileRef) {

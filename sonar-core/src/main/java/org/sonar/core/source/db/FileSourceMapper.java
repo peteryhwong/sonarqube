@@ -28,7 +28,7 @@ import java.util.List;
 
 public interface FileSourceMapper {
 
-  List<FileSourceDto> selectHashesForProject(String projectUuid);
+  List<FileSourceDto> selectHashesForProject(@Param("projectUuid") String projectUuid, @Param("dataType") String dataType);
 
   @CheckForNull
   FileSourceDto select(@Param("fileUuid") String fileUuid, @Param("dataType") String dataType);
@@ -38,7 +38,4 @@ public interface FileSourceMapper {
   void update(FileSourceDto dto);
 
   void updateDateWhenUpdatedDateIsZero(@Param("projectUuid") String projectUuid, @Param("date") Long updateDate);
-
-  @CheckForNull
-  String selectLineHashes(String fileUuid);
 }

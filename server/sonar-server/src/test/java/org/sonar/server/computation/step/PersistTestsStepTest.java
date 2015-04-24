@@ -55,10 +55,10 @@ import static org.mockito.Mockito.when;
 
 public class PersistTestsStepTest extends BaseStepTest {
   private static final String PROJECT_UUID = "PROJECT";
-  private static final int TEST_FILE_REF_1 = 1;
-  private static final int TEST_FILE_REF_2 = 2;
-  private static final int MAIN_FILE_REF_1 = 3;
-  private static final int MAIN_FILE_REF_2 = 4;
+  private static final int TEST_FILE_REF_1 = 3;
+  private static final int TEST_FILE_REF_2 = 4;
+  private static final int MAIN_FILE_REF_1 = 5;
+  private static final int MAIN_FILE_REF_2 = 6;
   private static final String TEST_FILE_UUID_1 = "TEST-FILE-1";
   private static final String TEST_FILE_UUID_2 = "TEST-FILE-2";
   private static final String MAIN_FILE_UUID_1 = "MAIN-FILE-1";
@@ -112,7 +112,7 @@ public class PersistTestsStepTest extends BaseStepTest {
   }
 
   @Test
-  public void insert_tests_in_report() throws Exception {
+  public void insert_several_tests_in_a_report() throws Exception {
     BatchReportWriter writer = new BatchReportWriter(reportDir);
     List<BatchReport.Test> batchTests = Arrays.asList(
       newTest(1), newTest(2)
@@ -131,8 +131,39 @@ public class PersistTestsStepTest extends BaseStepTest {
     assertThat(dto.getProjectUuid()).isEqualTo(PROJECT_UUID);
     assertThat(dto.getFileUuid()).isEqualTo(TEST_FILE_UUID_1);
     assertThat(dto.getTestData()).hasSize(2);
+
     FileSourceDb.Test test1 = dto.getTestData().get(0);
-    assertThat(test1.getFileUuid()).isEqualTo(TEST_FILE_UUID_1);
+    assertThat(test1.getName()).isEqualTo("name#1");
+    assertThat(test1.getCoveredFileCount()).isEqualTo(1);
+    assertThat(test1.getCoveredFile(0).getFileUuid()).isEqualTo(MAIN_FILE_UUID_1);
+
+    FileSourceDb.Test test2 = dto.getTestData().get(1);
+    assertThat(test2.getName()).isEqualTo("name#2");
+    assertThat(test2.getCoveredFileList()).isEmpty();
+  }
+
+  @Test
+  public void insert_all_data_of_a_test() throws Exception {
+    BatchReportWriter writer = new BatchReportWriter(reportDir);
+    List<BatchReport.Test> batchTests = Arrays.asList(
+      newTest(1)
+    );
+    writer.writeTests(TEST_FILE_REF_1, batchTests);
+    List<CoverageDetail> coverageDetails = Arrays.asList(
+      newCoverageDetail(1, MAIN_FILE_REF_1)
+    );
+    writer.writeCoverageDetails(TEST_FILE_REF_1, coverageDetails);
+
+    sut.execute(new ComputationContext(new BatchReportReader(reportDir), ComponentTesting.newProjectDto(PROJECT_UUID)));
+
+    FileSourceDto dto = dbClient.fileSourceDao().selectTest(TEST_FILE_UUID_1);
+    assertThat(dto.getCreatedAt()).isEqualTo(now);
+    assertThat(dto.getUpdatedAt()).isEqualTo(now);
+    assertThat(dto.getProjectUuid()).isEqualTo(PROJECT_UUID);
+    assertThat(dto.getFileUuid()).isEqualTo(TEST_FILE_UUID_1);
+    assertThat(dto.getTestData()).hasSize(1);
+
+    FileSourceDb.Test test1 = dto.getTestData().get(0);
     assertThat(test1.getName()).isEqualTo("name#1");
     assertThat(test1.getMsg()).isEqualTo("message#1");
     assertThat(test1.getStacktrace()).isEqualTo("stacktrace#1");
@@ -142,10 +173,6 @@ public class PersistTestsStepTest extends BaseStepTest {
     assertThat(test1.getCoveredFileCount()).isEqualTo(1);
     assertThat(test1.getCoveredFile(0).getCoveredLineList()).containsExactly(1, 2, 3);
     assertThat(test1.getCoveredFile(0).getFileUuid()).isEqualTo(MAIN_FILE_UUID_1);
-    FileSourceDb.Test test2 = dto.getTestData().get(1);
-    assertThat(test2.getFileUuid()).isEqualTo(TEST_FILE_UUID_1);
-    assertThat(test2.getName()).isEqualTo("name#2");
-    assertThat(test2.getCoveredFileList()).isEmpty();
   }
 
   @Test
@@ -194,8 +221,8 @@ public class PersistTestsStepTest extends BaseStepTest {
     assertThat(dto.getCreatedAt()).isEqualTo(100_000);
     assertThat(dto.getUpdatedAt()).isEqualTo(now);
     assertThat(dto.getTestData()).hasSize(2);
+
     FileSourceDb.Test test = dto.getTestData().get(0);
-    assertThat(test.getFileUuid()).isEqualTo(TEST_FILE_UUID_1);
     assertThat(test.getName()).isEqualTo("name#1");
     assertThat(test.getMsg()).isEqualTo("message#1");
     assertThat(test.getCoveredFileCount()).isEqualTo(1);
@@ -205,7 +232,6 @@ public class PersistTestsStepTest extends BaseStepTest {
 
   private FileSourceDb.Test newDbTest(int id) {
     return FileSourceDb.Test.newBuilder()
-      .setFileUuid(TEST_FILE_UUID_1)
       .setName("name#" + id)
       .setType(TestType.IT)
       .setStatus(TestStatus.ERROR)
@@ -254,7 +280,7 @@ public class PersistTestsStepTest extends BaseStepTest {
       .setRef(2)
       .setType(Constants.ComponentType.MODULE)
       .setUuid("MODULE")
-      .addChildRef(TEST_FILE_REF_1)
+      .addAllChildRef(Arrays.asList(TEST_FILE_REF_1, TEST_FILE_REF_2, MAIN_FILE_REF_1, MAIN_FILE_REF_2))
       .build());
     writer.writeComponent(BatchReport.Component.newBuilder()
       .setRef(TEST_FILE_REF_1)

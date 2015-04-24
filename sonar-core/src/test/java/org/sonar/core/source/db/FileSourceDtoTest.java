@@ -34,17 +34,17 @@ public class FileSourceDtoTest {
   public void encode_and_decode_test_data() throws Exception {
     List<FileSourceDb.Test> tests = Arrays.asList(
       FileSourceDb.Test.newBuilder()
-        .setFileUuid("uuid-1")
+        .setName("name#1")
         .build(),
       FileSourceDb.Test.newBuilder()
-        .setFileUuid("uuid-2")
+        .setName("name#2")
         .build()
-    );
+      );
 
     FileSourceDto sut = new FileSourceDto()
       .setTestData(tests);
 
     assertThat(sut.getTestData()).hasSize(2);
-    assertThat(sut.getTestData().get(0).getFileUuid()).isEqualTo("uuid-1");
+    assertThat(sut.getTestData().get(0).getName()).isEqualTo("name#1");
   }
 }

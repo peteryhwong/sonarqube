@@ -236,7 +236,7 @@ public class FileSourceDto {
   /**
    * Hash of file content. Value is computed by batch.
    */
-  public FileSourceDto setSrcHash(String srcHash) {
+  public FileSourceDto setSrcHash(@Nullable String srcHash) {
     this.srcHash = srcHash;
     return this;
   }
@@ -269,7 +269,7 @@ public class FileSourceDto {
   }
 
   public static class Type {
-    public final static String SOURCE = "SOURCE";
-    public final static String TEST = "TEST";
+    public static final String SOURCE = "SOURCE";
+    public static final String TEST = "TEST";
   }
 }
