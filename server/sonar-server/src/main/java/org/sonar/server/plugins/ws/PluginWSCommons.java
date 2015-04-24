@@ -55,6 +55,7 @@ public class PluginWSCommons {
   static final String OBJECT_UPDATE = "update";
   static final String OBJECT_RELEASE = "release";
   static final String ARRAY_REQUIRES = "requires";
+  static final String PROPERTY_SOURCE_REVISION = "sourceRevision";
 
   public static final Ordering<PluginMetadata> NAME_KEY_PLUGIN_METADATA_COMPARATOR = Ordering.natural()
     .onResultOf(PluginMetadataToName.INSTANCE)
@@ -62,7 +63,7 @@ public class PluginWSCommons {
   public static final Comparator<Plugin> NAME_KEY_PLUGIN_ORDERING = Ordering.from(CASE_INSENSITIVE_ORDER)
       .onResultOf(PluginToName.INSTANCE)
       .compound(
-          Ordering.from(CASE_INSENSITIVE_ORDER).onResultOf(PluginToKey.INSTANCE)
+              Ordering.from(CASE_INSENSITIVE_ORDER).onResultOf(PluginToKey.INSTANCE)
       );
   public static final Comparator<PluginUpdate> NAME_KEY_PLUGIN_UPDATE_ORDERING = Ordering.from(NAME_KEY_PLUGIN_ORDERING)
     .onResultOf(PluginUpdateToPlugin.INSTANCE);
@@ -87,6 +88,7 @@ public class PluginWSCommons {
     jsonWriter.prop(PROPERTY_ORGANIZATION_URL, pluginMetadata.getOrganizationUrl());
     jsonWriter.prop(PROPERTY_HOMEPAGE, pluginMetadata.getHomepage());
     jsonWriter.prop(PROPERTY_ISSUE_TRACKER_URL, pluginMetadata.getIssueTrackerUrl());
+    jsonWriter.prop(PROPERTY_SOURCE_REVISION, pluginMetadata.getImplementationBuild());
   }
 
   public void writeArtifact(JsonWriter jsonWriter, PluginMetadata pluginMetadata) {

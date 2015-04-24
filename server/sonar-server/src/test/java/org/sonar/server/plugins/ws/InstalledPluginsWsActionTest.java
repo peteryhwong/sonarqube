@@ -109,6 +109,7 @@ public class InstalledPluginsWsActionTest {
         .setHomepage("homepage_url")
         .setIssueTrackerUrl("issueTracker_url")
         .setFile(new File(getClass().getResource(jarFilename).toURI()))
+        .setImplementationBuild("sou_rev_sha1")
       )
       );
 
@@ -128,6 +129,7 @@ public class InstalledPluginsWsActionTest {
         "      \"organizationUrl\": \"org_url\"," +
         "      \"homepage\": \"homepage_url\"," +
         "      \"issueTrackerUrl\": \"issueTracker_url\"," +
+        "      \"sourceRevision\": \"sou_rev_sha1\"," +
         "      \"artifact\":" +
         "      {" +
         "        \"name\": \"some.jar\"" +
