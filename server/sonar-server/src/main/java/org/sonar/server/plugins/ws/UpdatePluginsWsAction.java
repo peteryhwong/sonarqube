@@ -56,8 +56,10 @@ public class UpdatePluginsWsAction implements PluginsWsAction {
     WebService.NewAction action = controller.createAction("update")
       .setPost(true)
       .setDescription("Updates a plugin specified by its key to the latest version compatible with the SonarQube instance." +
-          "<br/>" +
-          "Requires user to be authenticated with Administer System permissions")
+        "<br/>" +
+        "Plugin information is retrieved from Update Center." +
+        "<br/>" +
+        "Requires user to be authenticated with Administer System permissions")
       .setHandler(this);
 
     action.createParam(PARAM_KEY)

@@ -57,6 +57,8 @@ public class InstallPluginsWsAction implements PluginsWsAction {
       .setPost(true)
       .setDescription("Installs the latest version of a plugin specified by its key." +
         "<br/>" +
+        "Plugin information is retrieved from Update Center." +
+        "<br/>" +
         "Requires user to be authenticated with Administer System permissions")
       .setHandler(this);
 
